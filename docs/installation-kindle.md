@@ -13,9 +13,9 @@ with and without Zenos, recording the configuration. Neither has been device-val
    (**☰ → Exit**).
 2. Connect USB. The Kindle's USB root (`/mnt/us` on the device) shows `documents/` and `koreader/`.
 3. Back up any existing `koreader/plugins/arxiv.koplugin` folder somewhere outside `koreader/plugins/`.
-4. Download `arxiv.koplugin-v0.1.0.zip` and `arxiv.koplugin-v0.1.0.zip.sha256` from the
+4. Download `arxiv.koplugin-v2026.11.1.zip` and `arxiv.koplugin-v2026.11.1.zip.sha256` from the
    [release page](https://github.com/pirafrank/arxiv.koplugin/releases), and check the checksum
-   (`sha256sum -c arxiv.koplugin-v0.1.0.zip.sha256`).
+   (`sha256sum -c arxiv.koplugin-v2026.11.1.zip.sha256`).
 5. Extract the zip **into `koreader/plugins/`**. The result must be exactly:
 
    ```text
@@ -30,7 +30,7 @@ with and without Zenos, recording the configuration. Neither has been device-val
    Not `arxiv.koplugin/arxiv.koplugin/…`, and not `arxiv.koplugin-main/…`.
 
    From a Linux/WSL shell you can instead run
-   `scripts/install-to-kindle.sh /path/to/Kindle arxiv.koplugin-v0.1.0.zip`. It checks the target,
+   `scripts/install-to-kindle.sh /path/to/Kindle arxiv.koplugin-v2026.11.1.zip`. It checks the target,
    backs up an existing copy, copies only the four files, verifies them, and never unmounts the device.
 6. Eject the Kindle safely and start KOReader.
 7. If needed, enable **arXiv Downloader** in **☰ → Tools → More tools → Plugin management** and restart.
