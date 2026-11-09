@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      real_network:
+        description: "Also download a real paper from arxiv.org (non-deterministic)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+env:
+  # Pinned KOReader runtime used for the integration spec (docs/compatibility.md).
+  KOREADER_TAG: v2026.07.1
+  KOREADER_SHA256: 299aadb28147a25e9432ced1214ea444a4184393b5ae97cf42402c8a61b1a1b0
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install tools (Ubuntu 24.04 archive versions)
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends luajit lua-check shellcheck zip unzip
+      - name: Syntax, lint, unit tests
+        run: scripts/check.sh
+      - name: Package and verify layout
+        run: scripts/package.sh
+
+  integration:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install tools
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends luajit lua-check shellcheck xz-utils
+      - name: Fetch pinned KOReader runtime
+        run: |
+          name="koreader-linux-x86_64-${KOREADER_TAG}.tar.xz"
+          curl -fsSL -o "$RUNNER_TEMP/$name" "https://github.com/koreader/koreader/releases/download/${KOREADER_TAG}/$name"
+          echo "${KOREADER_SHA256}  $RUNNER_TEMP/$name" | sha256sum -c -
+          mkdir "$RUNNER_TEMP/koreader" && tar -xJf "$RUNNER_TEMP/$name" -C "$RUNNER_TEMP/koreader"
+      - name: Integration spec (headless KOReader with OPDS)
+        env:
+          ARXIV_REAL_NETWORK: ${{ inputs.real_network && '1' || '0' }}
+        run: |
+          KOREADER_DIR="$RUNNER_TEMP/koreader/lib/koreader" scripts/check.sh --integration

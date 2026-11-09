@@ -1,0 +1,41 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write # create the GitHub Release and upload assets
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install tools
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends luajit lua-check shellcheck zip unzip
+      - name: Verify version consistency
+        run: |
+          version=$(sed -n 's/^ *version = "\([0-9][0-9.]*\)",$/\1/p' arxiv.koplugin/_meta.lua)
+          test "v$version" = "$GITHUB_REF_NAME" || { echo "tag $GITHUB_REF_NAME != _meta.lua v$version"; exit 1; }
+          grep -q "^## \[$version\]" CHANGELOG.md || { echo "CHANGELOG.md has no [$version] entry"; exit 1; }
+          echo "VERSION=$version" >> "$GITHUB_ENV"
+      - name: Test
+        run: scripts/check.sh
+      - name: Package
+        run: scripts/package.sh
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          notes=$(awk -v v="$VERSION" '$0 ~ "^## \\[" v "\\]" {f=1; next} /^## \[/ {f=0} f' CHANGELOG.md)
+          gh release create "$GITHUB_REF_NAME" --verify-tag --title "arxiv.koplugin $GITHUB_REF_NAME" \
+            --notes "$notes
+
+          SHA-256: \`$(cut -d' ' -f1 "dist/arxiv.koplugin-$GITHUB_REF_NAME.zip.sha256")\`" \
+            "dist/arxiv.koplugin-$GITHUB_REF_NAME.zip" "dist/arxiv.koplugin-$GITHUB_REF_NAME.zip.sha256"
