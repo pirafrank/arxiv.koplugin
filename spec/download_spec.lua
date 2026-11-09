@@ -53,6 +53,9 @@ local function fake_fs(opts)
         return true
     end
     function fs.remove(path)
+        if opts.remove_fails and opts.remove_fails(path) then
+            return nil, "remove failed"
+        end
         fs.files[path] = nil
         return true
     end
@@ -392,6 +395,41 @@ describe("download_pdf filesystem errors", function()
 end)
 
 describe("download_pdf recovery of interrupted attempts", function()
+    it("stops before transfer if backup restoration fails", function()
+        local fs = fake_fs({ rename_fails = function() return true end })
+        local backup = "/books/.2609.16338.pdf.arxiv-backup"
+        fs.files[backup] = "%PDF-original"
+        local calls = 0
+        local res = get({}, { fs = fs, overwrite = true, http_request = function()
+            calls = calls + 1
+        end })
+        assert.equal("fs_error", res.code)
+        assert.equal("%PDF-original", fs.files[backup])
+        assert.equal(nil, fs.files[DEST])
+        assert.equal(0, calls)
+        assert.equal(0, #fs.opened)
+    end)
+
+    it("stops before transfer if backup or stale temp removal fails", function()
+        for _, leftover in ipairs({
+            "/books/.2609.16338.pdf.arxiv-backup",
+            "/books/.2609.16338.pdf.arxiv-5f00aa.part",
+        }) do
+            local fs = fake_fs({ remove_fails = function() return true end })
+            fs.files[DEST] = "%PDF-current"
+            fs.files[leftover] = "retained bytes"
+            local calls = 0
+            local res = get({}, { fs = fs, overwrite = true, http_request = function()
+                calls = calls + 1
+            end })
+            assert.equal("fs_error", res.code)
+            assert.equal("%PDF-current", fs.files[DEST])
+            assert.equal("retained bytes", fs.files[leftover])
+            assert.equal(0, calls)
+            assert.equal(0, #fs.opened)
+        end
+    end)
+
     it("removes only its own stale temp files", function()
         local fs = fake_fs()
         fs.files["/books/.2609.16338.pdf.arxiv-5f00aa.part"] = "partial"

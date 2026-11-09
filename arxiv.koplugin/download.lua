@@ -94,16 +94,23 @@ end
 local function recover(fs, dir, base)
     local dest, backup = dir .. "/" .. base, dir .. "/." .. base .. ".arxiv-backup"
     if fs.exists(backup) then
+        local ok, err
         if fs.exists(dest) then
-            fs.remove(backup)
+            ok, err = fs.remove(backup)
         else
-            fs.rename(backup, dest)
+            ok, err = fs.rename(backup, dest)
+        end
+        if not ok then
+            return fail("fs_error", err)
         end
     end
     local pattern = "^%." .. escape_pattern(base) .. "%.arxiv%-%x+%.part$"
     for _, name in ipairs(fs.list(dir) or {}) do
         if name:match(pattern) then
-            fs.remove(dir .. "/" .. name)
+            local ok, err = fs.remove(dir .. "/" .. name)
+            if not ok then
+                return fail("fs_error", err)
+            end
         end
     end
 end
@@ -223,7 +230,10 @@ local function run(opts)
     if not M.is_trusted_url(opts.url) then
         return fail("untrusted_url", opts.url)
     end
-    recover(fs, dir, base)
+    local recovery_error = recover(fs, dir, base)
+    if recovery_error then
+        return recovery_error
+    end
     local backup = dir .. "/." .. base .. ".arxiv-backup"
 
     local url, visited = opts.url, {}
