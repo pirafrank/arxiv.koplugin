@@ -2,7 +2,7 @@ name: Release
 
 on:
   push:
-    tags: ["v*"]
+    tags: ["v*.*.*"]
 
 permissions:
   contents: read
@@ -16,14 +16,26 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          fetch-depth: 0 # git-cliff needs all commits and release tags
       - name: Install tools
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends luajit lua-check shellcheck zip unzip
       - name: Verify version consistency
         run: |
           version=$(sed -n 's/^ *version = "\([0-9][0-9.]*\)",$/\1/p' arxiv.koplugin/_meta.lua)
           test "v$version" = "$GITHUB_REF_NAME" || { echo "tag $GITHUB_REF_NAME != _meta.lua v$version"; exit 1; }
-          grep -q "^## \[$version\]" CHANGELOG.md || { echo "CHANGELOG.md has no [$version] entry"; exit 1; }
           echo "VERSION=$version" >> "$GITHUB_ENV"
+      - name: Generate changelog and release notes
+        run: |
+          cargo install git-cliff --version 2.10.1 --locked
+          git-cliff --output CHANGELOG.md
+          grep -q "^## \[$VERSION\]" CHANGELOG.md
+          git-cliff --current --strip header --output "$RUNNER_TEMP/version_notes.md"
+          cat docs/quickstart.md > "$RUNNER_TEMP/release-notes.md"
+          echo "" >> "$RUNNER_TEMP/release-notes.md"
+          cat "$RUNNER_TEMP/version_notes.md" >> "$RUNNER_TEMP/release-notes.md"
+          echo "" >> "$RUNNER_TEMP/release-notes.md"
+          printf '\nFull changelog: https://github.com/%s/blob/%s/CHANGELOG.md\n' \
+            "$GITHUB_REPOSITORY" "$GITHUB_REF_NAME" >> "$RUNNER_TEMP/release-notes.md"
       - name: Test
         run: scripts/check.sh
       - name: Package
@@ -33,9 +45,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
-          notes=$(awk -v v="$VERSION" '$0 ~ "^## \\[" v "\\]" {f=1; next} /^## \[/ {f=0} f' CHANGELOG.md)
+          checksum=$(cut -d' ' -f1 "dist/arxiv.koplugin-$GITHUB_REF_NAME.zip.sha256")
+          printf '\nSHA-256: `%s`\n' "$checksum" >> "$RUNNER_TEMP/release-notes.md"
           gh release create "$GITHUB_REF_NAME" --verify-tag --title "arxiv.koplugin $GITHUB_REF_NAME" \
-            --notes "$notes
-
-          SHA-256: \`$(cut -d' ' -f1 "dist/arxiv.koplugin-$GITHUB_REF_NAME.zip.sha256")\`" \
+            --notes-file "$RUNNER_TEMP/release-notes.md" \
             "dist/arxiv.koplugin-$GITHUB_REF_NAME.zip" "dist/arxiv.koplugin-$GITHUB_REF_NAME.zip.sha256"
