@@ -1,11 +1,12 @@
 # Compatibility
 
 KOReader plugin APIs are internal Lua interfaces, not a stable public API. This plugin
-was written against, and tested with, the release below.
+was written against and tested with the KOReader releases below.
 
-| KOReader release | commit | API checked | local test result | Kindle result |
+| KOReader release | commit / build | API checked | local test result | Kindle result |
 | --- | --- | --- | --- | --- |
-| v2026.07.1 (Linux x86_64 release tarball, sha256 `299aadb28147a25e9432ced1214ea444a4184393b5ae97cf42402c8a61b1a1b0`) | `9192014d8bd82a91dc1012473be0f238dedfdb54` | yes (list below) | PASS: unit 60/60; headless integration 14/14 incl. real arxiv.org download (2026-11-09) | NOT TESTED (no device accessible) |
+| v2026.07.1 (Linux x86_64 release tarball, sha256 `299aadb28147a25e9432ced1214ea444a4184393b5ae97cf42402c8a61b1a1b0`) | `9192014d8bd82a91dc1012473be0f238dedfdb54` | yes (list below) | PASS: unit 60/60; headless integration 14/14 incl. real arxiv.org download (2026-11-09) | Tested on Kindle 7th Basic with ZenOS 4.3.0-beta3 |
+| v2026.07.2 | Kindle build | — | — | Tested on Kindle 7th Basic with ZenOS 4.3.0-beta3 |
 | master (reference only) | `739291bfbb52b23e430cf1ff92b3a0e2e16d3e6a` (2026-11-09) | diffed (see below) | not run (no matching runtime build) | NOT TESTED |
 
 Coexistence was tested with the built-in OPDS plugin of that release.
@@ -27,11 +28,9 @@ Results reproduced after the recovery and packaging changes:
 - Adding `name` to `_meta.lua` produced a KOReader deprecation warning; it remains
   omitted. The main module and folder already identify the plugin as `arxiv`.
 
-Publication, catalog discovery, Storefront README rendering/full installation on
-Kindle, and Kindle operation with and without Zenos remain **NOT TESTED**.
-The checkout has no configured Git remote; no public release was created by this audit.
-The earlier baseline table records the original implementation's results, not the
-post-change unit-test count.
+Publication, catalog discovery, and Storefront README rendering/full installation on
+Kindle remain **NOT TESTED**. Device testing was performed with ZenOS 4.3.0-beta3,
+operation without ZenOS has not been tested.
 
 ## APIs used and where they were verified (v2026.07.1)
 

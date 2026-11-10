@@ -4,8 +4,10 @@ Prerequisite: a jailbroken Kindle on which KOReader **already launches** and ope
 This project does not install or repair jailbreaks, KUAL/KPM or KOReader itself. See the
 [KOReader Kindle installation wiki](https://github.com/koreader/koreader/wiki/Installation-on-Kindle-devices).
 
-Zenos is optional; the plugin uses KOReader APIs only. Run the checklist below separately
-with and without Zenos, recording the configuration. Neither has been device-validated.
+ZenOS is optional; the plugin uses KOReader APIs only. The plugin has been tested on a
+Kindle 7th Basic with KOReader v2026.07.1 and v2026.07.2 and ZenOS 4.3.0-beta3.
+The checklist below can be used to record detailed results for other device or software
+configurations; operation without ZenOS has not been tested.
 
 ## Steps
 

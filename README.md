@@ -1,28 +1,38 @@
 # arxiv.koplugin: arXiv PDF downloader for KOReader
 
-Type or paste an arXiv identifier or link in KOReader's File Manager, and the paper's PDF is saved
+Type or paste an arXiv identifier or link in KOReader's [File Manager](https://github.com/koreader/koreader/blob/master/frontend/apps/filemanager/filemanager.lua), and the paper's PDF is saved
 to your KOReader download folder, ready to read.
 
 Example input (syntax only): `2609.16338`, `2609.16338v2`, `arXiv:2609.16338`,
 `https://arxiv.org/abs/2609.16338`, `https://arxiv.org/pdf/2609.16338v2.pdf`.
 
+<p align="center">
+  <img src="media/screenshots/001.png" alt="arXiv option in the KOReader menu" width="90%">
+</p>
+<p align="center">
+  <img src="media/screenshots/002.png" alt="Entering an arXiv paper identifier" width="45%">
+  <img src="media/screenshots/003.png" alt="Download confirmation in KOReader" width="45%">
+</p>
+
 ## Requirements and status
 
-Requires KOReader with working Wi-Fi and a writable download folder. The target is a
-jailbroken Kindle running KOReader, with or without Zenos; Zenos is not a dependency.
-Kindle and Zenos device validation is pending. No device has been tested yet.
+Requires [KOReader](https://github.com/koreader/koreader) with working Wi-Fi and a writable
+download folder. The target is a jailbroken Kindle running KOReader, with or without
+[ZenOS](https://github.com/xZenLabs/zen-os). ZenOS is not a dependency.
+Tested on a Kindle 7th Basic with KOReader v2026.07.1 and v2026.07.2, using
+ZenOS 4.3.0-beta3. See [compatibility](https://github.com/pirafrank/arxiv.koplugin/blob/main/docs/compatibility.md)
+for the recorded results and remaining hardware limitations.
 
-Tested locally with KOReader v2026.07.1 on Linux using headless integration tests.
-See [compatibility](https://github.com/pirafrank/arxiv.koplugin/blob/main/docs/compatibility.md)
-for the recorded results and hardware limitations.
+Headless integration tests also run locally with KOReader v2026.07.1 on Linux.
 
 ## Install from Storefront
 
-Once a public release is available and listed, open Storefront in KOReader, search for
+Once a public release is available and listed, open [Storefront](https://github.com/misko903/storefront.koplugin)
+in KOReader, search for
 **arxiv.koplugin**, install it, and restart KOReader. If it is not listed, use
 Storefront's **Install plugin from URL** option with `https://github.com/pirafrank/arxiv.koplugin`.
 Menu labels vary by Storefront version. A release and catalog refresh are needed for
-normal search discovery; the repository name alone does not guarantee a listing.
+normal search discovery, the repository name alone does not guarantee a listing.
 
 ## Install manually
 
@@ -37,10 +47,15 @@ Kindle specifics, an install helper script and rollback: [docs/installation-kind
 To update, replace the folder the same way. To uninstall, delete `koreader/plugins/arxiv.koplugin`.
 Downloaded PDFs stay.
 
-## Use
+## How to use
 
 File Manager → menu → search (magnifier) tab → **Download arXiv PDF** → enter the ID or URL →
 **Download** → **Read now** (or **Later**).
+
+In ZenOS's alternate UI, you can add the plugin as a navigation bar tab or add it as a
+Launcher action. To create a tab, go to **ZenOS Settings → Interface → Navigation bar → Tabs**
+and add one with **Plugin:** `Download arXiv PDF`, **Label:** `arXiv`, and an icon of your
+choice (the screenshots use `settings_cloud_download_offline`).
 
 If `<id>.pdf` already exists you can **Read existing**, **Overwrite** or **Cancel**. Nothing is
 replaced without asking, and a failed overwrite keeps the old file.
@@ -67,7 +82,7 @@ works with or without the OPDS plugin installed.
 ## Network and privacy
 
 The only requests go to `https://arxiv.org/pdf/<id>` and, if arXiv redirects, other `https://*.arxiv.org`
-addresses (at most 5 redirects; HTTP downgrades are refused). TLS certificates and host names are verified
+addresses (at most 5 redirects and HTTP downgrades are refused). TLS certificates and host names are verified
 using KOReader's bundled CA list. There are no accounts, credentials, analytics or telemetry, no external
 binaries (`curl`, Python, …), and nothing runs in the background. Details: [docs/architecture.md](https://github.com/pirafrank/arxiv.koplugin/blob/main/docs/architecture.md).
 
@@ -88,9 +103,10 @@ git-cliff --output CHANGELOG.md     # regenerate history using cliff.toml (git-c
 
 Storefront publishing guide: [docs/releasing.md](https://github.com/pirafrank/arxiv.koplugin/blob/main/docs/releasing.md).
 
-Write Conventional Commit messages (`feat:`, `fix:`, `docs:`, etc.). CHANGELOG.md is
-generated from committed history using [git-cliff](https://git-cliff.org/docs/configuration/);
-keep current features and limitations in this README so they are visible in Storefront.
+Write Conventional Commit messages (`feat:`, `fix:`, `docs:`, etc.). `CHANGELOG.md` is
+generated from committed history using [git-cliff](https://git-cliff.org/docs/configuration/).
+
+Keep current features and limitations in this `README` so they are visible in Storefront.
 Uncommitted changes do not appear in the generated changelog.
 
 Releases are built by `.github/workflows/release.yml` from an annotated `vX.Y.Z` tag that matches

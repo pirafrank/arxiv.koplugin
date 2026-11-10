@@ -55,11 +55,11 @@ instructions if you choose to submit it.
 
 ## Device validation
 
-Kindle checks are pending until tested on hardware, both with and without Zenos.
-Record the device, firmware, KOReader and Storefront versions, Zenos
-configuration, and individual results in
-[compatibility.md](compatibility.md). Do not describe a device check as passing
-until it has been run.
+Device testing has been performed on a Kindle 7th Basic with KOReader v2026.07.1
+and v2026.07.2 and ZenOS 4.3.0-beta3; see [compatibility.md](compatibility.md).
+Storefront installation on Kindle and operation without ZenOS remain untested.
+Record any additional device, firmware, KOReader and Storefront versions, ZenOS
+configuration, and individual results in [compatibility.md](compatibility.md).
 
 ## References
 
